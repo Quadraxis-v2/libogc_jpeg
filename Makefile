@@ -15,11 +15,11 @@ include $(DEVKITPPC)/wii_rules
 # SOURCES is a list of directories containing source code
 # INCLUDES is a list of directories containing extra header files
 #---------------------------------------------------------------------------------
-TARGET		:=	$(notdir $(CURDIR))
+TARGET		:=	jpegogc
 BUILD		:=	build
 SOURCES		:=	source
 DATA		:=	data
-INCLUDES	:=
+INCLUDES	:=	include
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -73,7 +73,7 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES), -iquote $(CURDIR)/$(dir)) \
 					-I$(CURDIR)/$(BUILD) \
 					-I$(LIBOGC_INC)
 
-.PHONY: $(BUILD) clean
+.PHONY: $(BUILD) clean install
 
 #---------------------------------------------------------------------------------
 all: $(BUILD)
@@ -89,6 +89,16 @@ $(BUILD): lib
 clean:
 	@echo clean ...
 	@rm -fr $(BUILD) lib
+
+#---------------------------------------------------------------------------------
+install:
+	@cp -f $(OUTPUT) $(PORTLIBS_PATH)/ppc/lib
+	@cp -f $(wildcard include/*.h??) $(PORTLIBS_PATH)/ppc/include
+
+#---------------------------------------------------------------------------------
+checks:
+	cppcheck source/ --enable=all --verbose --cppcheck-build-dir=cppcheck/ --error-exitcode=1 \
+		--platform=cppcheck/wii.cfg --suppress=missingIncludeSystem --suppress=unusedFunction
 
 #---------------------------------------------------------------------------------
 else

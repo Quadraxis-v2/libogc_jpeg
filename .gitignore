@@ -42,3 +42,7 @@
 
 # VSCode log files
 *.log
+
+# Cppcheck
+cppcheck/*
+!cppcheck/wii.cfg

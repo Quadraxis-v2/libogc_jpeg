@@ -1,0 +1,42 @@
+name: Run checks
+
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: devkitpro/devkitppc
+
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cppcheck
+          sudo apt-get install -y zip
+          
+      - name: Checkout code
+        uses: actions/checkout@v4.2.2
+
+      - name: Cache Cppcheck build folder
+        id: cache-build
+        uses: actions/cache@v4.2.3
+        with:
+          path: cppcheck
+          key: checks
+      
+      - name: Run static checks
+        run: make checks
+
+      - name: Set variables
+        run: echo "REPO_NAME=$(echo ${{ github.repository }} | cut -d/ -f2)" >> "$GITHUB_ENV"
+
+      - name: Build
+        run: |
+          make all
+          make package
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4.6.2
+        with: 
+          name: ${{ env.REPO_NAME }}
+          path: ${{ env.REPO_NAME }}.zip
